@@ -144,6 +144,27 @@ def search_anilist(query):
     search_results = search(query)
     return search_results
 
+def search_imdb(query):
+	def search(query):
+		base_url = 'https://v2.sg.media-imdb.com/suggestion/'
+		new_url = base_url + query[0] + '/' + query + '.json'
+
+		response = helpers.get(new_url).json()['d']
+		results = [
+			{
+			'picture': x['i']['imageUrl'],
+			'url': 'https://www.imdb.com/title/' + x['id'],
+			'type': ('TV' if 'tv' in x['q'].lower() else 'Movie'),
+			'year': int(x['y']),
+			'rank': int(x['rank']),
+			'title': x['l']
+			} for x in response
+			]
+		return [AnimeInfo(url = results[0]['url'], title = results[0]['title'],
+				jp_title = results[0]['title'])]
+	# using the first result to compare
+	search_results = search(query)
+	return search_results
 
 def fuzzy_match_metadata(seasons_info, search_results):
     # Gets the SearchResult object with the most similarity title-wise to the first MAL result
