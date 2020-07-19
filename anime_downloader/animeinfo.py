@@ -144,6 +144,26 @@ def search_anilist(query):
     search_results = search(query)
     return search_results
 
+def search_kitsu(query):
+	def search(query):
+		base_url = 'https://kitsu.io/api/edge/anime'
+		response = helpers.get(base_url, params={'?filter[text]': query}).json()['data']
+		response = [
+			{
+			'url': x['links']['self'],
+			'title': x['attributes']['canonicalTitle'],
+			'synopsis': x['attributes']['synopsis'],
+			'jp_title': x['attributes']['titles']['ja_jp'],
+			'year': int(x['attributes']['startDate'].split('-')[0]),
+			'total_eps': x['attributes']['episodeCount'],
+			'picture': x['attributes']['posterImage']['original'],
+			'status': x['attributes']['status']
+			} for x in response
+			]
+		return [AnimeInfo(url = response[0]['url'], title = response[0]['title'],
+				jp_title = response[0]['jp_title'])]
+	search_results = search(query)
+	return search_results
 
 def fuzzy_match_metadata(seasons_info, search_results):
     # Gets the SearchResult object with the most similarity title-wise to the first MAL result
