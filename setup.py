@@ -24,7 +24,7 @@ setup(
         'beautifulsoup4>=4.6.0',
         'requests>=2.18.4',
         'Click>=6.7',
-        'git://github.com/ArjixGamer/fuzzywuzzy.git',
+        'https://github.com/ArjixGamer/fuzzywuzzy/archive/master.zip',
         'coloredlogs>=10.0',
         'cfscrape>=2.0.5',
         'requests-cache>=0.4.13',
