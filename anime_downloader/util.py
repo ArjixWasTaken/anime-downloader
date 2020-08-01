@@ -279,7 +279,8 @@ def format_command(cmd, episode, file_format, speed_limit, path):
                    '--stream-piece-selector=inorder --min-split-size=5M --referer={referer} '
                    '--check-certificate=false --user-agent={useragent} --max-overall-download-limit={speed_limit} '
                    '--console-log-level={log_level}',
-        '{idm}': 'idman.exe /n /d {stream_url} /p {download_dir} /f {file_format}.mp4'
+        '{idm}': 'idman.exe /n /d {stream_url} /p {download_dir} /f {file_format}.mp4',
+        '{wget}': 'wget {stream_url} --referer={referer} --user-agent="{useragent}" -P {download_dir} -O {file_format}.mp4 -c'
     }
 
     # Allows for passing the user agent with self.headers in the site.
@@ -298,7 +299,12 @@ def format_command(cmd, episode, file_format, speed_limit, path):
         'speed_limit': speed_limit,
         'log_level': log_level
     }
-
+    if cmd == "{wget}":
+        path_string = file_format.replace('\\', '/').split('/')
+        rep_dict['file_format'] = path_string.pop(-1)
+        path_string = '/'.join(path_string)
+        rep_dict['download_dir'] = os.path.join(path, path_string)
+        
     if cmd == "{idm}":
         rep_dict['file_format'] = rep_dict['file_format'].replace('/', '\\')
 
