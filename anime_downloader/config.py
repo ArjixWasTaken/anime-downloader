@@ -20,6 +20,7 @@ DEFAULT_CONFIG = {
         'provider': 'twist.moe',
         'external_downloader': '',
         'aria2c_for_torrents': False,
+        'aria2c_log_level': 'error',
         'selescrape_browser': None,
         'selescrape_browser_executable_path': None,
         'selescrape_driver_binary_path': None,
@@ -66,7 +67,13 @@ DEFAULT_CONFIG = {
         },
         'animeflv': {
             'version': 'subbed',
-            'server': 'Stape',
+            'servers': [
+                'stape',
+                'natsuki',
+                'gocdn',
+                'yu',
+                'fembed'
+            ]
         },
         'anime8': {
             'version': 'subbed',
@@ -193,6 +200,13 @@ DEFAULT_CONFIG = {
                 'fembed',
                 'vidstreaming',
                 'mixdrop',
+            ]
+        },
+        'putlockers': {
+            'version': 'dubbed',
+            'servers': [
+                'eplay',
+                'mixdrop'
             ]
         }
     }

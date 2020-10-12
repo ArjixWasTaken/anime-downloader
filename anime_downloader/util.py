@@ -18,7 +18,7 @@ import requests
 from tabulate import tabulate
 from uuid import uuid4
 from secrets import choice
-from urllib.parse import urlparse
+from urllib.parse import urlparse, unquote
 
 from anime_downloader import session
 from anime_downloader.sites import get_anime_class, helpers
@@ -207,7 +207,8 @@ def print_episodeurl(episode):
     #    print(episode.source().stream_url + "?referer=" +  episode.source().referer)
     # else:
     # Currently I don't know of a way to specify referer in url itself so leaving it here.
-    print(episode.source().stream_url)
+    url = episode.url if episode.url.startswith("magnet") else episode.source().stream_url
+    print(unquote(url))
 
 
 def play_episode(episode, *, player, title):
@@ -242,12 +243,13 @@ def get_json(url, params=None):
 
 def slugify(file_name):
     file_name = str(file_name).strip().replace(' ', '_')
-    return re.sub(r'(?u)[^-\w.]', '', file_name)
+    # First group removes filenames starting with a dot making them hidden.
+    # Second group removes anything not in it, for example '"/\|
+    return re.sub(r'(^\.)|([^-\w.!+-])', '', file_name)
 
 
 def format_filename(filename, episode):
     zerosTofill = math.ceil(math.log10(episode._parent._len))
-
     rep_dict = {
         'anime_title': slugify(episode._parent.title),
         'ep_no': str(episode.ep_no).zfill(zerosTofill),
@@ -263,11 +265,22 @@ def format_command(cmd, episode, file_format, speed_limit, path):
     if not Config._CONFIG['dl']['aria2c_for_torrents'] and episode.url.startswith('magnet:?xt=urn:btih:'):
         return ['open', episode.url]
 
+    # For aria2c.
+    log_levels = ['debug', 'info', 'notice', 'warn', 'error']
+    log_level = Config['dl']['aria2c_log_level'].lower()
+    if log_level not in log_levels:
+        logger.warn('Invalid logging level "{}", defaulting to "error".'.format(log_level))
+        logger.debug('Possible levels: {}.'.format(log_levels))
+        log_level = 'error'
+
     cmd_dict = {
         '{aria2}': 'aria2c {stream_url} -x 12 -s 12 -j 12 -k 10M -o '
-                   '{file_format}.mp4 --continue=true --dir={download_dir}'
-                   ' --stream-piece-selector=inorder --min-split-size=5M --referer={referer} --check-certificate=false --user-agent={useragent} --max-overall-download-limit={speed_limit}',
-        '{idm}': 'idman.exe /n /d {stream_url} /p {download_dir} /f {file_format}.mp4'
+                   '{file_format}.mp4 --continue=true --dir={download_dir} '
+                   '--stream-piece-selector=inorder --min-split-size=5M --referer={referer} '
+                   '--check-certificate=false --user-agent={useragent} --max-overall-download-limit={speed_limit} '
+                   '--console-log-level={log_level}',
+        '{idm}': 'idman.exe /n /d {stream_url} /p {download_dir} /f {file_format}.mp4',
+        '{wget}': 'wget {stream_url} --referer={referer} --user-agent={useragent} -P {download_dir} -O {file_format}.mp4 -c'
     }
 
     # Allows for passing the user agent with self.headers in the site.
@@ -283,9 +296,15 @@ def format_command(cmd, episode, file_format, speed_limit, path):
         'download_dir': os.path.abspath(path),
         'referer': episode.source().referer,
         'useragent': useragent,
-        'speed_limit': speed_limit
+        'speed_limit': speed_limit,
+        'log_level': log_level
     }
-
+    if cmd == "{wget}":
+        path_string = file_format.replace('\\', '/').split('/')
+        rep_dict['file_format'] = path_string.pop(-1)
+        path_string = '/'.join(path_string)
+        rep_dict['download_dir'] = os.path.join(path, path_string)
+        
     if cmd == "{idm}":
         rep_dict['file_format'] = rep_dict['file_format'].replace('/', '\\')
 
@@ -421,3 +440,4 @@ class ClickListOption(click.Option):
             return ast.literal_eval(value)
         except:
             raise click.BadParameter(value)
+
