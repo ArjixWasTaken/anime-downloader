@@ -280,7 +280,7 @@ def format_command(cmd, episode, file_format, speed_limit, path):
                    '--check-certificate=false --user-agent={useragent} --max-overall-download-limit={speed_limit} '
                    '--console-log-level={log_level}',
         '{idm}': 'idman.exe /n /d {stream_url} /p {download_dir} /f {file_format}.mp4',
-        '{wget}': 'wget {stream_url} --referer={referer} --user-agent="{useragent}" -P {download_dir} -O {file_format}.mp4 -c'
+        '{wget}': 'wget {stream_url} --referer={referer} --user-agent={useragent} -P {download_dir} -O {file_format}.mp4 -c'
     }
 
     # Allows for passing the user agent with self.headers in the site.
