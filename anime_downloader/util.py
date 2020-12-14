@@ -294,8 +294,11 @@ def format_command(cmd, episode, file_format, speed_limit, path):
                    '--check-certificate=false --user-agent={useragent} --max-overall-download-limit={speed_limit} '
                    '--console-log-level={log_level}',
         '{idm}': 'idman.exe /n /d {stream_url} /p {download_dir} /f {file_format}.mp4',
-        '{wget}': 'wget {stream_url} --referer={referer} --user-agent={useragent} -O {download_dir}/{file_format}.mp4 -c'
+        '{wget}': 'wget {stream_url} --referer={referer} --user-agent={useragent} -O {download_dir}/{file_format}.mp4 -c',
+        '{youtube_dl}': 'youtube-dl {stream_url} -o {file_format} -f best --referer={referer} --hls-prefer-native --no-warnings --user-agent={useragent}'
     }
+    if cmd == "{youtube_dl}":
+        os.chdir(rep_dict['download_dir'])
 
     # Allows for passing the user agent with self.headers in the site.
     # Some sites block downloads using a different user agent.
@@ -316,6 +319,9 @@ def format_command(cmd, episode, file_format, speed_limit, path):
         'speed_limit': speed_limit,
         'log_level': log_level
     }
+    if 'm3u8' in rep_dict['stream_url']:
+        cmd = '{youtube_dl}'
+        rep_dict['file_format'] = rep_dict['file_format'] if rep_dict['file_format'].endswith('.mp4') else rep_dict['file_format'] + '.mp4'
 
     if cmd == "{wget}":
         # Create the directory if it doesn't exist
