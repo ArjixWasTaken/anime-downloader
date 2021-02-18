@@ -299,13 +299,13 @@ def format_command(cmd, episode, file_format, speed_limit, path):
         log_level = 'error'
 
     cmd_dict = {
-        '{aria2}': 'aria2c {stream_url} -x 12 -s 12 -j 12 -k 10M -o '
+        '{aria2}': 'aria2c "{stream_url}" -x 12 -s 12 -j 12 -k 10M -o '
                    '{file_format}.mp4 --continue=true --dir={download_dir} '
                    '--stream-piece-selector=inorder --min-split-size=5M --referer={referer} '
-                   '--check-certificate=false --user-agent={useragent} --max-overall-download-limit={speed_limit} '
+                   '--check-certificate=false --user-agent="{useragent}" --max-overall-download-limit={speed_limit} '
                    '--console-log-level={log_level}',
         '{idm}': 'idman.exe /n /d {stream_url} /p {download_dir} /f {file_format}.mp4',
-        '{wget}': 'wget {stream_url} --referer={referer} --user-agent={useragent} -O {download_dir}/{file_format}.mp4 -c'
+        '{wget}': 'wget "{stream_url}" --referer={referer} --user-agent="{useragent}" -O {download_dir}/{file_format}.mp4 -c'
     }
 
     # Allows for passing the user agent with self.headers in the site.
