@@ -1,7 +1,6 @@
 name: Generate 120 UA
 
 on:
-  push:
   schedule:
     - cron: "0 0 1 */2 *"
 
